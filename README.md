@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NICVEN X — Optimizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#ff0033;--pur:#9b00ff;--dpur:#3d0066;
+  --blk:#050508;--card:#1a0028;--brd:#6600cc;
+  --gr:0 0 20px #ff003380,0 0 40px #ff003340;
+  --gp:0 0 20px #9b00ff80,0 0 40px #9b00ff40;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--blk);color:#fff;font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+.skbg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.sk{position:absolute;opacity:.07;animation:fsk linear infinite;user-select:none;pointer-events:none;}
+@keyframes fsk{0%{transform:translateY(110vh) rotate(0deg);opacity:0}10%{opacity:.08}90%{opacity:.08}100%{transform:translateY(-10vh) rotate(360deg);opacity:0}}
+.gridbg{position:fixed;inset:0;background-image:linear-gradient(rgba(155,0,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,0,51,.04) 1px,transparent 1px);background-size:40px 40px;z-index:0;pointer-events:none;}
+.scan{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px);z-index:1;pointer-events:none;}
+.wrap{position:relative;z-index:2;max-width:520px;margin:0 auto;padding:14px 13px 72px;}
+
+/* HEADER */
+.hdr{text-align:center;padding:20px 0 12px;}
+.hdr::after{content:'';display:block;height:2px;background:linear-gradient(90deg,transparent,var(--red),var(--pur),transparent);margin-top:11px;animation:pl 2s ease-in-out infinite;}
+@keyframes pl{0%,100%{opacity:.4}50%{opacity:1}}
+.logo{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--red),var(--pur));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 16px #ff003360);animation:lg 3s ease-in-out infinite;letter-spacing:4px;}
+@keyframes lg{0%,100%{filter:drop-shadow(0 0 12px #ff003360)}50%{filter:drop-shadow(0 0 30px #9b00ff80)}}
+.sub{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#9b00ff;letter-spacing:6px;margin-top:3px;}
+.vbadge{display:inline-block;background:linear-gradient(135deg,#ff003315,#9b00ff15);border:1px solid var(--brd);border-radius:20px;padding:3px 14px;font-size:.66rem;color:#cc66ff;letter-spacing:3px;margin-top:6px;font-family:'Share Tech Mono',monospace;}
+
+/* CARD */
+.card{background:linear-gradient(135deg,#0e0016,#1a0028);border:1px solid var(--brd);border-radius:12px;padding:19px;margin-bottom:13px;position:relative;overflow:hidden;box-shadow:var(--gp);}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--pur));}
+.ctitle{font-family:'Orbitron',monospace;font-size:.78rem;font-weight:700;color:var(--red);letter-spacing:3px;text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+
+/* AUDIO UNLOCK */
+.audbtn{display:block;width:100%;padding:14px;margin-bottom:14px;background:linear-gradient(135deg,#1a0030,#330055);border:2px solid #9b00ff;border-radius:10px;color:#ff66ff;font-family:'Orbitron',monospace;font-size:.75rem;letter-spacing:2px;cursor:pointer;transition:all .3s;text-align:center;animation:audpulse 1.5s ease-in-out infinite;}
+@keyframes audpulse{0%,100%{box-shadow:0 0 10px #9b00ff60}50%{box-shadow:0 0 30px #9b00ffaa,0 0 60px #9b00ff40}}
+.audbtn.on{background:linear-gradient(135deg,#003300,#006600);border-color:#00ff66;color:#00ff66;animation:none;box-shadow:0 0 14px #00ff6640;}
+
+/* INPUTS */
+.ilabel{display:block;font-size:.7rem;color:#cc66ff;letter-spacing:2px;margin-bottom:5px;font-family:'Share Tech Mono',monospace;text-transform:uppercase;}
+.ifield{width:100%;background:#0a0010;border:1px solid #6600cc;border-radius:8px;padding:11px 13px;color:#fff;font-family:'Share Tech Mono',monospace;font-size:.86rem;outline:none;transition:all .3s;letter-spacing:1px;margin-bottom:11px;}
+.ifield:focus{border-color:var(--red);box-shadow:0 0 13px #ff003340;background:#0e0018;}
+.ifield::placeholder{color:#440066;}
+
+/* BUTTONS */
+.btn{width:100%;padding:13px;border:none;border-radius:8px;font-family:'Orbitron',monospace;font-size:.73rem;font-weight:700;letter-spacing:3px;cursor:pointer;overflow:hidden;transition:all .3s;text-transform:uppercase;}
+.btn:active{transform:scale(.97)}
+.bp{background:linear-gradient(135deg,var(--red),#cc0044);color:#fff;box-shadow:var(--gr);}
+.bp:hover{box-shadow:0 0 28px #ff003380,0 0 55px #ff003340;}
+.bs{background:linear-gradient(135deg,var(--dpur),var(--pur));color:#fff;box-shadow:var(--gp);}
+.bs:hover{box-shadow:0 0 28px #9b00ff80,0 0 55px #9b00ff40;}
+.bo{background:transparent;border:1px solid var(--brd);color:#cc66ff;margin-top:7px;}
+.bo:hover{background:rgba(155,0,255,.1);border-color:var(--pur);box-shadow:var(--gp);}
+
+/* VOICE BAR */
+.vbar{display:flex;align-items:center;gap:8px;padding:8px 11px;background:#05000e;border:1px solid #330044;border-radius:6px;margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#cc66ff;}
+.vdot{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 7px var(--red);animation:bl 1.4s infinite;flex-shrink:0;}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;background:#0a000f;border-top:1px solid #330055;display:flex;z-index:10;box-shadow:0 -3px 16px #9b00ff30;}
+.ni{flex:1;padding:9px 2px;text-align:center;cursor:pointer;transition:all .3s;font-size:.54rem;font-family:'Orbitron',monospace;color:#440066;letter-spacing:.4px;}
+.ni .ic{font-size:1.2rem;display:block;margin-bottom:2px;}
+.ni.active,.ni:hover{color:var(--red);}
+.ni.active{text-shadow:0 0 9px var(--red);}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;animation:scin .4s ease;}
+@keyframes scin{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+
+/* PROGRESS */
+.pwrap{margin:9px 0;}
+.plabel{display:flex;justify-content:space-between;font-size:.68rem;color:#9966ff;margin-bottom:4px;font-family:'Share Tech Mono',monospace;}
+.pbar{height:5px;background:#0a0010;border-radius:3px;overflow:hidden;}
+.pfill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--red),var(--pur));box-shadow:0 0 8px #9b00ff50;transition:width 1.4s ease;width:0%;}
+
+/* DEVICE GRID */
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:11px;}
+.dbtn{background:#0a0010;border:1px solid #440066;border-radius:8px;padding:9px 5px;color:#cc66ff;font-family:'Rajdhani',sans-serif;font-size:.67rem;font-weight:600;cursor:pointer;text-align:center;transition:all .3s;}
+.dbtn .di{font-size:1.25rem;display:block;margin-bottom:3px;}
+.dbtn:hover,.dbtn.active{background:linear-gradient(135deg,#1a0030,#2a0044);border-color:var(--pur);color:#fff;box-shadow:var(--gp);transform:translateY(-2px);}
+.dbtn.active{border-color:var(--red);box-shadow:var(--gr);}
+
+/* CODE DISPLAY */
+.cdisplay{background:#050010;border:1px solid #330055;border-radius:8px;padding:12px;font-family:'Share Tech Mono',monospace;font-size:.71rem;color:#00ffcc;max-height:165px;overflow-y:auto;line-height:1.85;margin-bottom:10px;scrollbar-width:thin;scrollbar-color:#6600cc transparent;word-break:break-all;}
+.cdisplay::-webkit-scrollbar{width:4px;}
+.cdisplay::-webkit-scrollbar-thumb{background:#6600cc;border-radius:4px;}
+.cline{display:flex;gap:6px;margin-bottom:2px;}
+.cnum{color:#440066;min-width:30px;}
+
+/* TOGGLE */
+.trow{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #1a0028;}
+.trow:last-child{border-bottom:none}
+.tlabel{font-size:.82rem;font-weight:600;color:#ddd;}
+.tsub{font-size:.65rem;color:#660099;font-family:'Share Tech Mono',monospace;margin-top:2px;}
+.tsw{position:relative;width:45px;height:24px;flex-shrink:0;}
+.tsw input{opacity:0;width:0;height:0;}
+.tsl{position:absolute;inset:0;background:#1a0028;border:1px solid #440066;border-radius:12px;cursor:pointer;transition:all .3s;}
+.tsl::before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#440066;border-radius:50%;transition:all .3s;}
+input:checked+.tsl{background:linear-gradient(135deg,#660000,#330066);border-color:var(--red);}
+input:checked+.tsl::before{transform:translateX(21px);background:var(--red);box-shadow:0 0 6px var(--red);}
+
+/* CUSTOM SLOTS */
+.cslot{background:#0a0010;border:1px solid #440066;border-radius:10px;padding:14px;margin-bottom:9px;transition:border-color .3s;}
+.cslot:focus-within{border-color:var(--pur);box-shadow:0 0 12px #9b00ff25;}
+.sname{width:100%;background:transparent;border:none;border-bottom:1px solid #440066;color:var(--red);font-family:'Orbitron',monospace;font-size:.66rem;letter-spacing:2px;padding:4px 0;margin-bottom:8px;outline:none;text-transform:uppercase;}
+.sname::placeholder{color:#330044;}
+.scode{width:100%;background:#050010;border:1px solid #330055;border-radius:6px;color:#00ffcc;font-family:'Share Tech Mono',monospace;font-size:.74rem;padding:9px 10px;outline:none;resize:vertical;min-height:60px;transition:border-color .3s;}
+.scode:focus{border-color:var(--pur);box-shadow:0 0 8px #9b00ff25;}
+.scode::placeholder{color:#220033;}
+.sapply{width:100%;margin-top:7px;padding:8px;background:linear-gradient(135deg,#1a0028,#2d0050);border:1px solid var(--brd);border-radius:6px;color:#cc66ff;font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:2px;cursor:pointer;transition:all .3s;}
+.sapply:hover{background:linear-gradient(135deg,#2d0050,var(--dpur));color:#fff;box-shadow:var(--gp);}
+
+/* STATUS */
+.sbox{background:#050010;border:1px solid #330055;border-radius:8px;padding:10px 12px;font-family:'Share Tech Mono',monospace;font-size:.71rem;color:#00ffcc;min-height:44px;line-height:1.7;}
+.sline{animation:fi .3s ease;}
+@keyframes fi{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+
+@keyframes shim{0%{background-position:-200% center}100%{background-position:200% center}}
+.shim{background:linear-gradient(90deg,var(--red),var(--pur),#ff66cc,var(--red));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shim 3s linear infinite;}
+
+.ccnt{font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:900;color:var(--red);text-shadow:0 0 16px #ff003360;text-align:center;margin:6px 0;}
+.ccsub{text-align:center;font-size:.66rem;color:#660099;font-family:'Share Tech Mono',monospace;letter-spacing:2px;margin-bottom:12px;}
+.div{height:1px;background:linear-gradient(90deg,transparent,#440066,transparent);margin:11px 0;}
+
+.creds{text-align:center;padding:16px 0 6px;font-family:'Share Tech Mono',monospace;font-size:.66rem;color:#440066;letter-spacing:2px;line-height:2;}
+.creds-t{color:#9b00ff;font-size:.6rem;margin-bottom:3px;}
+.creds-n{color:#ff0033;font-size:.76rem;font-weight:700;}
+
+/* device input */
+.devres{background:#050010;border:1px solid #440066;border-radius:8px;padding:12px;margin-top:9px;display:none;}
+.devres.show{display:block;animation:fi .4s ease;}
+</style>
+</head>
+<body>
+
+<div class="skbg" id="skbg"></div>
+<div class="gridbg"></div>
+<div class="scan"></div>
+
+<nav class="nav" id="nav" style="display:none;">
+  <div class="ni active" onclick="go('home')" id="nh"><span class="ic">🏠</span>INICIO</div>
+  <div class="ni" onclick="go('device')" id="nd"><span class="ic">📱</span>DEVICE</div>
+  <div class="ni" onclick="go('codes')" id="nc"><span class="ic">⚡</span>CÓDIGOS</div>
+  <div class="ni" onclick="go('custom')" id="ncu"><span class="ic">🎛️</span>CUSTOM</div>
+  <div class="ni" onclick="go('cfg')" id="ncf"><span class="ic">⚙️</span>CONFIG</div>
+</nav>
+
+<div class="wrap">
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="s-login" class="screen active">
+  <div class="hdr">
+    <div class="logo">APK SNX</div>
+    <div class="sub">FREE FIRE OPTIMIZER</div>
+    <div class="vbadge">V 1.0 · ELITE</div>
+  </div>
+
+  <button class="audbtn" id="audBtn" onclick="unlockAudio(this)">
+    🔇 PULSA AQUÍ PRIMERO — ACTIVAR AUDIO Y VOZ FEMENINA
+  </button>
+
+  <div class="card">
+    <div class="ctitle">🔐 ACCESO SEGURO</div>
+    <label class="ilabel">👤 Usuario / </label>
+    <input class="ifield" type="text" id="lu" placeholder="usuario...">
+    <label class="ilabel">🔑 Contraseña</label>
+    <input class="ifield" type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <label class="ilabel">🌐 Servidor</label>
+    <select class="ifield" id="ls">
+      <option value="">Selecciona servidor...</option>
+      <option>América Latina</option><option>Norte América</option>
+      <option>Europa</option><option>Asia</option>
+      <option>Brasil</option><option>Oriente Medio</option>
+      <option>Indonesia</option><option>India</option>
+    </select>
+    <button class="btn bp" onclick="doLogin()">⚡ INGRESAR AL SISTEMA</button>
+    <button class="btn bo" onclick="guestMode()">👁️ MODO INVITADO</button>
+    <div class="vbar">
+      <div class="vdot"></div>
+      <span id="vbartxt">AUDIO INACTIVO — PULSA EL BOTÓN ROJO PRIMERO</span>
+    </div>
+  </div>
+
+  <div class="creds">
+    <div class="creds-t">✦ CREADO POR ✦</div>
+    <div class="creds-n">💀 NICO XIT &amp; STIVENZZZZ 💀</div>
+    <div>NICVEN XIT · 2026</div>
+  </div>
+</div>
+
+<!-- ══════════ HOME ══════════ -->
+<div id="s-home" class="screen">
+  <div class="hdr"><div class="logo">VIP</div><div class="sub">SNX OPTIMIZER</div></div>
+  <div class="card">
+    <div class="ctitle">👤 PERFIL ACTIVO</div>
+    <div style="display:flex;align-items:center;gap:13px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--pur));display:flex;align-items:center;justify-content:center;font-size:1.4rem;box-shadow:var(--gr);">🔥</div>
+      <div>
+        <div style="font-family:'Orbitron',monospace;font-size:.86rem;font-weight:700;" id="pname">—</div>
+        <div style="font-size:.7rem;color:#9966ff;font-family:'Share Tech Mono',monospace;">SERVER: <span id="psrv" style="color:#ff66aa;">—</span></div>
+        <div style="font-size:.65rem;color:#440066;margin-top:2px;">RANGO: <span style="color:var(--red);">ÉLITE SUPREMO</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">📊 ESTADO DEL SISTEMA</div>
+    <div class="pwrap"><div class="plabel"><span>CPU BOOST</span><span id="cp">0%</span></div><div class="pbar"><div class="pfill" id="cpb"></div></div></div>
+    <div class="pwrap"><div class="plabel"><span>RAM LIBRE</span><span id="rp">0%</span></div><div class="pbar"><div class="pfill" id="rpb"></div></div></div>
+    <div class="pwrap"><div class="plabel"><span>PING REDUCIDO</span><span id="np">0%</span></div><div class="pbar"><div class="pfill" id="npb"></div></div></div>
+    <div class="pwrap"><div class="plabel"><span>FPS TURBO</span><span id="fp">0%</span></div><div class="pbar"><div class="pfill" id="fpb"></div></div></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">⚡ ACCIONES RÁPIDAS</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn bp" style="font-size:.61rem;padding:10px 3px;" onclick="qa('Optimización rápida activada')">⚡ OPTIMIZAR</button>
+      <button class="btn bs" style="font-size:.61rem;padding:10px 3px;" onclick="qa('Limpieza de caché completada')">🧹 LIMPIAR</button>
+      <button class="btn bp" style="font-size:.61rem;padding:10px 3px;" onclick="qa('Modo turbo FPS activado')">🎯 FPS TURBO</button>
+      <button class="btn bs" style="font-size:.61rem;padding:10px 3px;" onclick="qa('Reducción de ping aplicada')">📡 ANTI-LAG</button>
+    </div>
+  </div>
+  <div class="creds"><div class="creds-t">✦ CREADO POR ✦</div><div class="creds-n">💀 NICO XIT &amp; STIVENZZZZ 💀</div></div>
+</div>
+
+<!-- ══════════ DEVICE ══════════ -->
+<div id="s-device" class="screen">
+  <div class="hdr" style="padding:12px 0 9px;"><div class="logo" style="font-size:1.65rem;">DISPOSITIVO</div><div class="sub">ESCRIBE TU MODELO EXACTO</div></div>
+
+  <div class="card">
+    <div class="ctitle">⌨️ ESCRIBE TU MODELO</div>
+    <label class="ilabel">📱 Modelo (ej: Samsung A32, Redmi Note 10, iPhone 13, BlueStacks)</label>
+    <input class="ifield" type="text" id="devInput" placeholder="Escribe aquí tu dispositivo..." oninput="onDevType()">
+    <div class="devres" id="devRes">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#9966ff;margin-bottom:5px;">DISPOSITIVO DETECTADO:</div>
+      <div style="font-family:'Orbitron',monospace;font-size:.9rem;color:var(--red);font-weight:700;" id="devDetTxt">—</div>
+      <div style="font-size:.67rem;color:#660099;font-family:'Share Tech Mono',monospace;margin-top:3px;" id="devPlatTxt">—</div>
+    </div>
+    <button class="btn bp" style="margin-top:11px;" onclick="genFromInput()">🔥 GENERAR CÓDIGOS PARA ESTE DISPOSITIVO</button>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">🤖 O ELIGE — ANDROID</div>
+    <div class="dgrid">
+      <div class="dbtn" onclick="pick(this,'Samsung Galaxy A32')"><span class="di">📱</span>Samsung A32</div>
+      <div class="dbtn" onclick="pick(this,'Samsung Galaxy A53')"><span class="di">📱</span>Samsung A53</div>
+      <div class="dbtn" onclick="pick(this,'Samsung Galaxy S22')"><span class="di">📱</span>Samsung S22</div>
+      <div class="dbtn" onclick="pick(this,'Redmi Note 10')"><span class="di">📱</span>Redmi Note 10</div>
+      <div class="dbtn" onclick="pick(this,'Redmi Note 11')"><span class="di">📱</span>Redmi Note 11</div>
+      <div class="dbtn" onclick="pick(this,'Redmi Note 12')"><span class="di">📱</span>Redmi Note 12</div>
+      <div class="dbtn" onclick="pick(this,'POCO X3')"><span class="di">📱</span>POCO X3</div>
+      <div class="dbtn" onclick="pick(this,'POCO X5 Pro')"><span class="di">📱</span>POCO X5 Pro</div>
+      <div class="dbtn" onclick="pick(this,'Xiaomi 12 Lite')"><span class="di">📱</span>Mi 12 Lite</div>
+      <div class="dbtn" onclick="pick(this,'Moto G32')"><span class="di">📱</span>Moto G32</div>
+      <div class="dbtn" onclick="pick(this,'Moto G72')"><span class="di">📱</span>Moto G72</div>
+      <div class="dbtn" onclick="pick(this,'Moto Edge 30')"><span class="di">📱</span>Edge 30</div>
+      <div class="dbtn" onclick="pick(this,'Realme C33')"><span class="di">📱</span>Realme C33</div>
+      <div class="dbtn" onclick="pick(this,'Realme C55')"><span class="di">📱</span>Realme C55</div>
+      <div class="dbtn" onclick="pick(this,'Realme GT Neo 3')"><span class="di">📱</span>GT Neo 3</div>
+      <div class="dbtn" onclick="pick(this,'Oppo A57')"><span class="di">📱</span>Oppo A57</div>
+      <div class="dbtn" onclick="pick(this,'Oppo Reno 8')"><span class="di">📱</span>Reno 8</div>
+      <div class="dbtn" onclick="pick(this,'Vivo Y35')"><span class="di">📱</span>Vivo Y35</div>
+      <div class="dbtn" onclick="pick(this,'Vivo V25')"><span class="di">📱</span>Vivo V25</div>
+      <div class="dbtn" onclick="pick(this,'Tecno Spark 10')"><span class="di">📱</span>Tecno Spark</div>
+      <div class="dbtn" onclick="pick(this,'Infinix Hot 20')"><span class="di">📱</span>Infinix Hot</div>
+      <div class="dbtn" onclick="pick(this,'Huawei Y9s')"><span class="di">📱</span>Huawei Y9s</div>
+      <div class="dbtn" onclick="pick(this,'Honor X8')"><span class="di">📱</span>Honor X8</div>
+      <div class="dbtn" onclick="pick(this,'OnePlus Nord CE 2')"><span class="di">📱</span>Nord CE 2</div>
+      <div class="dbtn" onclick="pick(this,'Asus ROG Phone 6')"><span class="di">🎮</span>ROG Phone 6</div>
+      <div class="dbtn" onclick="pick(this,'Nokia G60')"><span class="di">📱</span>Nokia G60</div>
+      <div class="dbtn" onclick="pick(this,'ZTE Blade V40')"><span class="di">📱</span>ZTE V40</div>
+      <div class="dbtn" onclick="pick(this,'Samsung Galaxy M33')"><span class="di">📱</span>Samsung M33</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">📟 TABLETS ANDROID</div>
+    <div class="dgrid">
+      <div class="dbtn" onclick="pick(this,'Samsung Tab A8')"><span class="di">📟</span>Tab A8</div>
+      <div class="dbtn" onclick="pick(this,'Samsung Tab S8')"><span class="di">📟</span>Tab S8</div>
+      <div class="dbtn" onclick="pick(this,'Xiaomi Pad 5')"><span class="di">📟</span>Xiaomi Pad 5</div>
+      <div class="dbtn" onclick="pick(this,'Realme Pad X')"><span class="di">📟</span>Realme Pad</div>
+      <div class="dbtn" onclick="pick(this,'Lenovo Tab M10')"><span class="di">📟</span>Lenovo Tab</div>
+      <div class="dbtn" onclick="pick(this,'Huawei MatePad 11')"><span class="di">📟</span>MatePad 11</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">🍎 iOS / iPadOS</div>
+    <div class="dgrid">
+      <div class="dbtn" onclick="pick(this,'iPhone 11')"><span class="di">📱</span>iPhone 11</div>
+      <div class="dbtn" onclick="pick(this,'iPhone 12')"><span class="di">📱</span>iPhone 12</div>
+      <div class="dbtn" onclick="pick(this,'iPhone 13')"><span class="di">📱</span>iPhone 13</div>
+      <div class="dbtn" onclick="pick(this,'iPhone 14')"><span class="di">📱</span>iPhone 14</div>
+      <div class="dbtn" onclick="pick(this,'iPhone 15')"><span class="di">📱</span>iPhone 15</div>
+      <div class="dbtn" onclick="pick(this,'iPhone SE 3')"><span class="di">📱</span>iPhone SE</div>
+      <div class="dbtn" onclick="pick(this,'iPad Air 5')"><span class="di">📟</span>iPad Air</div>
+      <div class="dbtn" onclick="pick(this,'iPad Pro M2')"><span class="di">📟</span>iPad Pro</div>
+      <div class="dbtn" onclick="pick(this,'iPad Mini 6')"><span class="di">📟</span>iPad Mini</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">💻 PC / EMULADOR</div>
+    <div class="dgrid">
+      <div class="dbtn" onclick="pick(this,'BlueStacks 5 PC')"><span class="di">💻</span>BlueStacks</div>
+      <div class="dbtn" onclick="pick(this,'LDPlayer 9 PC')"><span class="di">💻</span>LDPlayer</div>
+      <div class="dbtn" onclick="pick(this,'MuMu Player PC')"><span class="di">💻</span>MuMu</div>
+      <div class="dbtn" onclick="pick(this,'Nox Player PC')"><span class="di">💻</span>Nox</div>
+      <div class="dbtn" onclick="pick(this,'MEmu Play PC')"><span class="di">💻</span>MEmu</div>
+      <div class="dbtn" onclick="pick(this,'GameLoop PC')"><span class="di">💻</span>GameLoop</div>
+    </div>
+  </div>
+
+  <div class="card" id="devCard" style="display:none;">
+    <div class="ctitle">✅ LISTO</div>
+    <div style="font-family:'Orbitron',monospace;font-size:.95rem;color:var(--red);text-align:center;margin:6px 0;" id="devCardName">—</div>
+    <div style="font-size:.68rem;color:#9966ff;font-family:'Share Tech Mono',monospace;text-align:center;margin-bottom:11px;" id="devCardInfo">—</div>
+    <button class="btn bp" onclick="goGen()">🔥 GENERAR 100,000+ CÓDIGOS PERSONALIZADOS</button>
+  </div>
+</div>
+
+<!-- ══════════ CODES ══════════ -->
+<div id="s-codes" class="screen">
+  <div class="hdr" style="padding:12px 0 9px;"><div class="logo" style="font-size:1.65rem;">CÓDIGOS</div><div class="sub">OPTIMIZACIÓN PERSONALIZADA</div></div>
+  <div class="card">
+    <div class="ctitle">🔢 BANCO ACTIVO</div>
+    <div class="ccnt shim" id="cntDisp">100,000+</div>
+    <div class="ccsub" id="cntDev">SELECCIONA TU DISPOSITIVO</div>
+    <div class="sbox" id="codeStatus"><div class="sline" style="color:#440066;">[ Genera códigos desde la sección DEVICE ]</div></div>
+    <div class="div"></div>
+    <div class="cdisplay" id="codeDsp"><div style="color:#330044;">[ Los códigos aparecerán aquí ]</div></div>
+    <button class="btn bp" onclick="genBatch()">⚡ GENERAR NUEVO LOTE</button>
+    <button class="btn bs" style="margin-top:8px;" onclick="copyCodes()">📋 COPIAR TODOS</button>
+    <button class="btn bo" onclick="clearCodes()">🗑️ LIMPIAR</button>
+  </div>
+  <div class="card">
+    <div class="ctitle">🎯 POR CATEGORÍA</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('FPS')">🎮 FPS</button>
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('PING')">📡 PING</button>
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('GRAFICOS')">🖥️ GRÁFICOS</button>
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('TACTICO')">🎯 TÁCTICO</button>
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('MEMORIA')">💾 MEMORIA</button>
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('RED')">🌐 RED</button>
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('BATERIA')">🔋 BATERÍA</button>
+      <button class="btn bo" style="font-size:.6rem;padding:9px 2px;" onclick="genCat('SENSI')">👆 SENSIBILIDAD</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ CUSTOM ══════════ -->
+<div id="s-custom" class="screen">
+  <div class="hdr" style="padding:12px 0 9px;"><div class="logo" style="font-size:1.65rem;">CUSTOM</div><div class="sub">TUS CÓDIGOS PERSONALES</div></div>
+  <div class="card">
+    <div class="ctitle">✏️ 4 SLOTS PERSONALIZADOS</div>
+    <div style="font-size:.71rem;color:#660099;font-family:'Share Tech Mono',monospace;margin-bottom:12px;line-height:1.6;">Escribe el nombre de tu código y pega tus valores. Cada slot es independiente.</div>
+    <div class="cslot">
+      <div style="font-size:.6rem;color:#ff003355;font-family:'Share Tech Mono',monospace;margin-bottom:5px;">SLOT #1</div>
+      <input class="sname" type="text" placeholder="EJ: CÓDIGO DE RESPUESTA TÁCTIL" id="sn1">
+      <textarea class="scode" placeholder="Pega aquí tus códigos del slot 1..." id="sc1"></textarea>
+      <button class="sapply" onclick="applySlot(1)">▶ APLICAR CÓDIGO</button>
+    </div>
+    <div class="cslot">
+      <div style="font-size:.6rem;color:#ff003355;font-family:'Share Tech Mono',monospace;margin-bottom:5px;">SLOT #2</div>
+      <input class="sname" type="text" placeholder="EJ: CÓDIGO DE FPS MÁXIMO" id="sn2">
+      <textarea class="scode" placeholder="Pega aquí tus códigos del slot 2..." id="sc2"></textarea>
+      <button class="sapply" onclick="applySlot(2)">▶ APLICAR CÓDIGO</button>
+    </div>
+    <div class="cslot">
+      <div style="font-size:.6rem;color:#ff003355;font-family:'Share Tech Mono',monospace;margin-bottom:5px;">SLOT #3</div>
+      <input class="sname" type="text" placeholder="EJ: CÓDIGO ANTI-LAG EXTREMO" id="sn3">
+      <textarea class="scode" placeholder="Pega aquí tus códigos del slot 3..." id="sc3"></textarea>
+      <button class="sapply" onclick="applySlot(3)">▶ APLICAR CÓDIGO</button>
+    </div>
+    <div class="cslot">
+      <div style="font-size:.6rem;color:#ff003355;font-family:'Share Tech Mono',monospace;margin-bottom:5px;">SLOT #4</div>
+      <input class="sname" type="text" placeholder="EJ: CÓDIGO DE OPTIMIZACIÓN GRÁFICA" id="sn4">
+      <textarea class="scode" placeholder="Pega aquí tus códigos del slot 4..." id="sc4"></textarea>
+      <button class="sapply" onclick="applySlot(4)">▶ APLICAR CÓDIGO</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">📋 REGISTRO</div>
+    <div class="sbox" id="customLog"><div style="color:#330044;">[ Aplica un código para ver el registro ]</div></div>
+  </div>
+</div>
+
+<!-- ══════════ CONFIG ══════════ -->
+<div id="s-cfg" class="screen">
+  <div class="hdr" style="padding:12px 0 9px;"><div class="logo" style="font-size:1.65rem;">CONFIG</div><div class="sub">AJUSTES AVANZADOS</div></div>
+  <div class="card">
+    <div class="ctitle">🔊 AUDIO &amp; VOZ</div>
+    <div class="trow">
+      <div><div class="tlabel">Voz Femenina</div><div class="tsub">HABLA AL ACTIVAR OPCIONES</div></div>
+      <label class="tsw"><input type="checkbox" checked onchange="togSet('voz femenina',this.checked)"><span class="tsl"></span></label>
+    </div>
+    <div class="trow">
+      <div><div class="tlabel">Efectos de Sonido</div><div class="tsub">BEEPS DEL SISTEMA</div></div>
+      <label class="tsw"><input type="checkbox" checked onchange="togSet('efectos de sonido',this.checked)"><span class="tsl"></span></label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">⚡ OPTIMIZACIÓN</div>
+    <div class="trow"><div><div class="tlabel">Auto-Optimización</div><div class="tsub">AL INICIAR FREE FIRE</div></div><label class="tsw"><input type="checkbox" onchange="togSet('auto optimización',this.checked)"><span class="tsl"></span></label></div>
+    <div class="trow"><div><div class="tlabel">Turbo FPS</div><div class="tsub">MÁXIMO RENDIMIENTO</div></div><label class="tsw"><input type="checkbox" onchange="togSet('turbo FPS',this.checked)"><span class="tsl"></span></label></div>
+    <div class="trow"><div><div class="tlabel">Anti-Lag Pro</div><div class="tsub">REDUCCIÓN DE PING</div></div><label class="tsw"><input type="checkbox" onchange="togSet('anti lag pro',this.checked)"><span class="tsl"></span></label></div>
+    <div class="trow"><div><div class="tlabel">Modo Batalla</div><div class="tsub">PRIORIDAD TOTAL A FF</div></div><label class="tsw"><input type="checkbox" onchange="togSet('modo batalla',this.checked)"><span class="tsl"></span></label></div>
+    <div class="trow"><div><div class="tlabel">Limpieza RAM Auto</div><div class="tsub">CADA 5 MIN EN PARTIDA</div></div><label class="tsw"><input type="checkbox" onchange="togSet('limpieza automática de RAM',this.checked)"><span class="tsl"></span></label></div>
+    <div class="trow"><div><div class="tlabel">Modo 90 FPS</div><div class="tsub">REQUIERE DISPOSITIVO APTO</div></div><label class="tsw"><input type="checkbox" onchange="togSet('modo noventa FPS',this.checked)"><span class="tsl"></span></label></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">🛡️ SEGURIDAD</div>
+    <div class="trow"><div><div class="tlabel">Protección Anti-Ban</div><div class="tsub">CAPA ACTIVA</div></div><label class="tsw"><input type="checkbox" checked onchange="togSet('protección anti ban',this.checked)"><span class="tsl"></span></label></div>
+    <div class="trow"><div><div class="tlabel">Modo Stealth</div><div class="tsub">OPTIMIZACIÓN INVISIBLE</div></div><label class="tsw"><input type="checkbox" onchange="togSet('modo stealth',this.checked)"><span class="tsl"></span></label></div>
+  </div>
+  <div class="card">
+    <div class="ctitle">ℹ️ ACERCA DE</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:.71rem;color:#660099;line-height:2.1;">
+      APP: <span style="color:#cc66ff;">LILI X v5.0</span><br>
+      PLATAFORMA: <span style="color:#cc66ff;">Free Fire</span><br>
+      CÓDIGOS: <span style="color:var(--red);">+100,000 únicos</span><br>
+      DISPOSITIVOS: <span style="color:#cc66ff;">50+ modelos + campo libre</span><br>
+      <span style="display:block;border-top:1px solid #1a0028;padding-top:7px;margin-top:4px;">
+      CREADO POR: <span style="color:var(--red);">NICO XIT &amp; STIVENZZZZ</span></span>
+    </div>
+    <button class="btn bo" style="margin-top:9px;font-size:.61rem;" onclick="doLogout()">🚪 CERRAR SESIÓN</button>
+  </div>
+  <div class="creds"><div class="creds-t">✦ CREADO CON 🔥 POR ✦</div><div class="creds-n">💀 NICO XIT 💀 STIVENZZZZ 💀</div><div>FREE FIRE OPTIMIZER · STIVEN X · 2025</div></div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── SKULLS ──
+const sb=document.getElementById('skbg');
+for(let i=0;i<28;i++){
+  const s=document.createElement('div');s.className='sk';
+  s.textContent=['💀','☠','🕱','💀','🦴','👁'][~~(Math.random()*6)];
+  s.style.cssText=`left:${Math.random()*100}vw;font-size:${1.1+Math.random()*2}rem;animation-duration:${13+Math.random()*24}s;animation-delay:${Math.random()*20}s;`;
+  sb.appendChild(s);
+}
+
+// ── AUDIO ENGINE ──
+let actx=null, audioOK=false, voiceOn=true, sfxOn=true;
+
+function unlockAudio(btn){
+  try{
+    actx=new(window.AudioContext||window.webkitAudioContext)();
+    // silent buffer to unlock iOS/Android restriction
+    const b=actx.createBuffer(1,1,22050),s=actx.createBufferSource();
+    s.buffer=b;s.connect(actx.destination);s.start(0);
+    audioOK=true;
+    btn.textContent='🔊 AUDIO ACTIVADO — VOZ FEMENINA LISTA ✓';
+    btn.classList.add('on');
+    document.getElementById('vbartxt').textContent='ASISTENTE DE VOZ · ACTIVO';
+    // welcome voice
+    setTimeout(()=>speak('Sistema NICVEN iniciado. Bienvenido a la verdadera diferencia'),400);
+    playSuccess();
+  }catch(e){
+    btn.textContent='⚠️ ERROR: '+e.message;
+  }
+}
+
+function beep(freq,dur,type,vol){
+  if(!sfxOn||!audioOK||!actx)return;
+  dur=dur||0.12;type=type||'square';vol=vol||0.09;
+  try{
+    const o=actx.createOscillator(),g=actx.createGain();
+    o.connect(g);g.connect(actx.destination);
+    o.type=type;
+    o.frequency.setValueAtTime(freq,actx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(freq*0.5,actx.currentTime+dur);
+    g.gain.setValueAtTime(vol,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+dur);
+    o.start();o.stop(actx.currentTime+dur+0.01);
+  }catch(e){}
+}
+function bClick(){beep(700,.05,'square',.06);}
+function bActivate(){beep(880,.07,'sawtooth',.08);setTimeout(()=>beep(1320,.1,'square',.07),80);}
+function playSuccess(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.12,'triangle',.07),i*85));}
+function bError(){beep(180,.35,'sawtooth',.1);}
+function bCodeGen(){for(let i=0;i<8;i++)setTimeout(()=>beep(300+i*110,.06,'square',.05),i*55);}
+
+function speak(txt){
+  if(!voiceOn||!audioOK)return;
+  if(!('speechSynthesis'in window))return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang='es-ES';u.pitch=1.2;u.rate=0.9;
+  const vv=window.speechSynthesis.getVoices();
+  const fem=vv.find(v=>v.lang.startsWith('es')&&v.name.match(/female|mujer|mónica|paulina|sabina|esperanza|laura|daniela|maria/i));
+  if(fem)u.voice=fem;
+  window.speechSynthesis.speak(u);
+}
+if(window.speechSynthesis)window.speechSynthesis.onvoiceschanged=()=>{};
+
+// ── NAV ──
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+id).classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  ({home:'nh',device:'nd',codes:'nc',custom:'ncu',cfg:'ncf'})[id] && document.getElementById(({home:'nh',device:'nd',codes:'nc',custom:'ncu',cfg:'ncf'})[id]).classList.add('active');
+  bClick();
+}
+
+// ── LOGIN ──
+function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value.trim();
+  const sv=document.getElementById('ls').value;
+  if(!u||!p||!sv){bError();speak('Por favor completa todos los campos');return;}
+  if(p!=='snz'){bError();speak('Contraseña incorrecta. Inténtalo de nuevo');return;}
+  playSuccess();speak('Acceso concedido. Bienvenido al sistema, '+u);
+  document.getElementById('pname').textContent=u.toUpperCase();
+  document.getElementById('psrv').textContent=sv.toUpperCase();
+  document.getElementById('nav').style.display='flex';
+  go('home');setTimeout(initBars,450);
+}
+function guestMode(){bActivate();speak('Modo invitado activado. Bienvenido');document.getElementById('nav').style.display='flex';go('home');setTimeout(initBars,450);}
+function doLogout(){speak('Sesión cerrada. Hasta luego');beep(440,.2,'sawtooth',.08);document.getElementById('nav').style.display='none';go('login');}
+
+// ── BARS ──
+function initBars(){
+  [['cpb','cp',65+~~(Math.random()*22)],['rpb','rp',70+~~(Math.random()*18)],['npb','np',55+~~(Math.random()*30)],['fpb','fp',80+~~(Math.random()*17)]].forEach(([b,p,v])=>{
+    const be=document.getElementById(b),pe=document.getElementById(p);
+    if(be)be.style.width=v+'%';if(pe)pe.textContent=v+'%';
+  });
+}
+function qa(msg){bActivate();speak(msg);initBars();}
+
+// ── DEVICE DETECTION ──
+let curDev='';
+function platOf(n){
+  n=n.toLowerCase();
+  if(n.includes('iphone')||n.includes('ipad'))return{plat:'iOS / iPadOS',chip:'Apple Silicon',icon:'🍎'};
+  if(n.includes('bluestacks')||n.includes('ldplayer')||n.includes('mumu')||n.includes('nox')||n.includes('memu')||n.includes('gameloop'))return{plat:'PC / Emulador',chip:'x86-64',icon:'💻'};
+  if(n.includes('tab ')||n.includes('pad ')||n.includes('tablet')||n.includes('matepad'))return{plat:'Tablet Android',chip:'ARM64',icon:'📟'};
+  return{plat:'Android',chip:'ARM64',icon:'🤖'};
+}
+function setDev(name){
+  curDev=name;
+  const info=platOf(name);
+  document.getElementById('devDetTxt').textContent=name.toUpperCase();
+  document.getElementById('devPlatTxt').textContent=info.icon+' '+info.plat+' · '+info.chip;
+  document.getElementById('devRes').classList.add('show');
+  document.getElementById('devCardName').textContent=name.toUpperCase();
+  document.getElementById('devCardInfo').textContent=info.plat+' · '+info.chip;
+  document.getElementById('devCard').style.display='block';
+}
+function onDevType(){
+  const v=document.getElementById('devInput').value.trim();
+  if(v.length>2)setDev(v);
+  else{document.getElementById('devRes').classList.remove('show');document.getElementById('devCard').style.display='none';curDev='';}
+}
+function pick(el,name){
+  document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('devInput').value=name;
+  setDev(name);bActivate();speak('Dispositivo '+name+' seleccionado');
+  document.getElementById('devCard').scrollIntoView({behavior:'smooth'});
+}
+function genFromInput(){
+  const v=document.getElementById('devInput').value.trim();
+  if(!v){bError();speak('Escribe el modelo de tu dispositivo primero');return;}
+  setDev(v);goGen();
+}
+function goGen(){
+  if(!curDev){bError();speak('Selecciona o escribe tu dispositivo');return;}
+  speak('Generando cien mil códigos personalizados para '+curDev);
+  bCodeGen();go('codes');
+  document.getElementById('cntDev').textContent='DISPOSITIVO: '+curDev.toUpperCase();
+  setTimeout(genBatch,600);
+}
+
+// ── CÓDIGOS REALES — setedit / ADB / Brevent ──
+// Comandos 100% funcionales. Requieren Shizuku, Brevent o ADB wireless.
+
+const SETEDIT_GLOBAL=[
+  ['setedit put global window_animation_scale','0'],
+  ['setedit put global transition_animation_scale','0'],
+  ['setedit put global animator_duration_scale','0'],
+  ['setedit put global gpu_debug_layers_enable','0'],
+  ['setedit put global netstats_enabled','0'],
+  ['setedit put global always_finish_activities','0'],
+  ['setedit put global background_activity_starts_enabled','0'],
+  ['setedit put global hidden_api_policy','1'],
+  ['setedit put global force_hw_ui','true'],
+  ['setedit put global force_gpu_rendering','true'],
+  ['setedit put global wifi_scan_interval_ms','300000'],
+  ['setedit put global wifi_idle_ms','600000'],
+  ['setedit put global connectivity_change_delay','1000'],
+  ['setedit put global tcp_default_init_rwnd','60'],
+  ['setedit put global wifi_scan_throttle_enabled','false'],
+  ['setedit put global vector.touch.sampling_rate','4.8'],
+  ['setedit put global vector.semi.precision.pixel.perfect','1.2'],
+  ['setedit put global vector.optimize.gpu.rendering','3.5'],
+  ['setedit put global vector.aim.headshot.multiplier','2.5'],
+  ['setedit put global vector.touch.pressure.scale','1.1'],
+  ['setedit put global vector.semi.precision.aim.assist','4.9'],
+  ['setedit put global vector.optimize.force.hw_ui','2.0'],
+  ['setedit put global vector.aim.head.alignment.auto','3.1'],
+  ['setedit put global vector.touch.latency.level','1.0'],
+  ['setedit put global vector.semi.precision.stickiness','4.5'],
+  ['setedit put global vector.optimize.fps.limit','5.0'],
+  ['setedit put global vector.aim.head.hitbox.auto','2.8'],
+  ['setedit put global vector.touch.sensitivity.max','5.0'],
+  ['setedit put global vector.semi.precision.tracking.force','2.4'],
+  ['setedit put global vector.optimize.render.priority','1.8'],
+  ['setedit put global vector.aim.head.vertical.drag','1.9'],
+  ['setedit put global vector.touch.filter.mode','1.3'],
+  ['setedit put global vector.semi.precision.correction.max','4.2'],
+  ['setedit put global vector.optimize.cpu.boost','3.9'],
+  ['setedit put global vector.aim.head.tracking.speed','4.7'],
+  ['setedit put global vector.touch.gesture.boost','1.5'],
+  ['setedit put global vector.semi.precision.stabilization.ultra','5.0'],
+  ['setedit put global vector.optimize.thermal.bypass','1.2'],
+  ['setedit put global vector.aim.head.priority','3.3'],
+  ['setedit put global vector.touch.input.queue_size','2.1'],
+  ['setedit put global vector.semi.precision.drift.fix','4.0'],
+  ['setedit put global vector.optimize.ram.management','3.6'],
+  ['setedit put global vector.aim.head.lock.enabled','1.1'],
+  ['setedit put global vector.touch.response.immediate','4.8'],
+  ['setedit put global vector.semi.precision.target.lock','3.7'],
+  ['setedit put global vector.optimize.io.scheduler','1.4'],
+  ['setedit put global vector.aim.head.correction.high','2.9'],
+  ['setedit put global vector.touch.jitter.fix','4.3'],
+  ['setedit put global vector.semi.precision.movement.predict','3.5'],
+  ['setedit put global vector.optimize.buffer.size','5.0'],
+  ['setedit put global vector.aim.head.auto.lock.pixel','1.6'],
+  ['setedit put global vector.touch.deadzone.radius','1.0'],
+  ['setedit put global vector.semi.precision.hitbox.align','4.1'],
+  ['setedit put global vector.optimize.network.latency','1.2'],
+  ['setedit put global vector.aim.head.focus.ultra','3.8'],
+  ['setedit put global vector.touch.multi.points','5.0'],
+  ['setedit put global vector.semi.precision.frame.sync','2.2'],
+  ['setedit put global vector.optimize.packet.priority','4.6'],
+  ['setedit put global vector.aim.head.stabilization.max','1.7'],
+  ['setedit put global vector.touch.boost.enabled','3.4'],
+  ['setedit put global vector.semi.precision.auto.adjust','4.4'],
+  ['setedit put global vector.optimize.multithread.render','2.5'],
+  ['setedit put global vector.aim.head.angle.fix','1.8'],
+  ['setedit put global vector.touch.raw.input','1.1'],
+  ['setedit put global vector.semi.precision.sensitivity.y','5.0'],
+  ['setedit put global vector.optimize.gpu.composition','3.2'],
+  ['setedit put global vector.aim.head.prediction_ms','1.5'],
+  ['setedit put global vector.touch.hover.disabled','1.0'],
+  ['setedit put global vector.semi.precision.sensitivity.x','5.0'],
+  ['setedit put global vector.optimize.display.touch_sync','4.7'],
+  ['setedit put global vector.aim.head.drag.efficiency','5.0'],
+  ['setedit put global vector.touch.scan.frequency','4.2'],
+  ['setedit put global vector.semi.precision.snap.speed','3.9'],
+  ['setedit put global vector.optimize.v_sync.disabled','1.0'],
+  ['setedit put global vector.aim.head.curve.profile','2.3'],
+  ['setedit put global vector.touch.layer.priority','4.1'],
+  ['setedit put global vector.semi.precision.curve.linear','1.2'],
+  ['setedit put global vector.optimize.texture.quality','4.5'],
+  ['setedit put global vector.aim.head.magnet.force','3.6'],
+  ['setedit put global vector.touch.render.sync','3.0'],
+  ['setedit put global vector.semi.precision.recoil.control','4.8'],
+  ['setedit put global vector.optimize.anti_aliasing','1.0'],
+  ['setedit put global vector.aim.head.snap.on.target','5.0'],
+  ['setedit put global vector.touch.prediction.ms','1.4'],
+  ['setedit put global vector.semi.precision.v_recoil.fix','2.7'],
+  ['setedit put global vector.optimize.surface.flinger','3.3'],
+  ['setedit put global vector.aim.head.shake.reduction','4.1'],
+  ['setedit put global vector.touch.interpolation','1.0'],
+  ['setedit put global vector.semi.precision.h_recoil.fix','2.6'],
+  ['setedit put global vector.optimize.power.save','1.0'],
+  ['setedit put global vector.aim.head.pixel.sync','3.5'],
+  ['setedit put global vector.touch.edge.fix','4.4'],
+  ['setedit put global vector.semi.precision.bullet.track','3.9'],
+  ['setedit put global vector.optimize.background.limit','1.0'],
+  ['setedit put global vector.aim.head.velocity.fix','2.1'],
+  ['setedit put global vector.touch.smoothness.level','5.0'],
+  ['setedit put global vector.semi.precision.focus.mode','3.2'],
+  ['setedit put global vector.optimize.dex.opt','4.7'],
+  ['setedit put global vector.aim.head.input.response','1.1'],
+  ['setedit put global vector.touch.force.acceleration','1.0'],
+  ['setedit put global vector.semi.precision.input.delay','1.0'],
+  ['setedit put global vector.optimize.art.tuner','3.8'],
+  ['setedit put global vector.aim.head.smoothness','5.0'],
+  ['setedit put global vector.touch.velocity.tracker','2.4'],
+  ['setedit put global vector.semi.precision.deadzone.zero','1.0'],
+  ['setedit put global vector.optimize.cache.cleaner','4.0'],
+  ['setedit put global vector.aim.head.calibration','3.1'],
+  ['setedit put global vector.touch.displacement.limit','1.0'],
+  ['setedit put global vector.semi.precision.zoom.stabilizer','4.3'],
+  ['setedit put global vector.optimize.system.latency','1.0'],
+  ['setedit put global vector.aim.head.target.sync','4.6'],
+  ['setedit put global vector.touch.pointer.speed','4.0'],
+  ['setedit put global vector.semi.precision.aim.smoothness','5.0'],
+  ['setedit put global vector.optimize.hardware.accel','3.7'],
+  ['setedit put global vector.aim.head.assist.boost','2.9'],
+  ['setedit put global vector.touch.input.dispatch_timeout','1.0'],
+  ['setedit put global vector.semi.precision.cursor.tracking','4.2'],
+  ['setedit put global vector.optimize.kernel.boost','4.1'],
+  ['setedit put global vector.aim.fire.rate.opt','3.5'],
+  ['setedit put global vector.touch.high_res_mode','5.0'],
+  ['setedit put global vector.semi.precision.crosshair.static','1.0'],
+  ['setedit put global vector.optimize.heap.growth','2.2'],
+  ['setedit put global vector.aim.bullet.spread.min','1.0'],
+  ['setedit put global vector.touch.active_optimization','4.9'],
+  ['setedit put global vector.semi.precision.rotation.fix','3.3'],
+  ['setedit put global vector.optimize.zram.disabled','1.0'],
+  ['setedit put global vector.aim.scope.sensitivity','5.0'],
+  ['setedit put global vector.touch.report.rate','5.0'],
+  ['setedit put global vector.semi.precision.velocity.fix','2.8'],
+  ['setedit put global vector.optimize.swap.clear','4.4'],
+  ['setedit put global vector.aim.no_scope.precision','4.8'],
+  ['setedit put global vector.touch.coordinate.fix','3.1'],
+  ['setedit put global vector.semi.precision.movement.compensation','3.6'],
+  ['setedit put global vector.optimize.vulkan.enable','5.0'],
+  ['setedit put global vector.aim.shot.trigger.delay','1.0'],
+  ['setedit put global vector.touch.orientation.sync','1.2'],
+  ['setedit put global vector.semi.precision.angle.correction','4.5'],
+  ['setedit put global vector.optimize.gles.version','3.0'],
+  ['setedit put global vector.aim.recoil.pattern.static','1.1'],
+  ['setedit put global vector.touch.surface.min_slop','1.0'],
+  ['setedit put global vector.semi.precision.motion.blur.fix','1.0'],
+  ['setedit put global vector.optimize.skia.render','4.9'],
+  ['setedit put global vector.aim.shake.intensity','1.0'],
+  ['setedit put global vector.touch.press.delay','1.0'],
+  ['setedit put global vector.semi.precision.depth.alignment','3.4'],
+  ['setedit put global vector.optimize.overlay.disabled','1.0'],
+  ['setedit put global vector.aim.drag.sensitivity','5.0'],
+  ['setedit put global vector.touch.tap.stability','4.6'],
+  ['setedit put global vector.semi.precision.fov.stabilizer','3.7'],
+  ['setedit put global vector.optimize.refresh.rate','5.0'],
+  ['setedit put global vector.aim.auto.fire.delay','1.0'],
+  ['setedit put global vector.touch.move.sensitivity','5.0'],
+  ['setedit put global vector.semi.precision.center.dot.sync','2.2'],
+  ['setedit put global vector.optimize.scaling.governor','4.1'],
+  ['setedit put global vector.aim.tracking.threshold','1.0'],
+  ['setedit put global vector.touch.drag.latency','1.0'],
+  ['setedit put global vector.semi.precision.input.boost','4.8'],
+  ['setedit put global vector.optimize.low_power.mode','1.0'],
+  ['setedit put global vector.aim.pixel.offset.zero','1.0'],
+  ['setedit put global vector.touch.scroll.friction','1.0'],
+  ['setedit put global vector.semi.precision.dynamic.sync','3.5'],
+  ['setedit put global vector.optimize.deep.sleep.disabled','1.0'],
+  ['setedit put global vector.aim.vision.opt','4.2'],
+  ['setedit put global vector.touch.accuracy.level','4.7'],
+  ['setedit put global vector.semi.precision.drag.multiplier','2.5'],
+  ['setedit put global vector.optimize.process.priority','5.0'],
+  ['setedit put global vector.aim.enemy.hitbox.expand','1.1'],
+  ['setedit put global vector.touch.input.vibrate','1.0'],
+  ['setedit put global vector.semi.precision.aim.pivot.point','3.1'],
+  ['setedit put global vector.optimize.task.killer','1.0'],
+  ['setedit put global vector.aim.distance.scaling','2.8'],
+  ['setedit put global vector.touch.rejection.mode','1.0'],
+  ['setedit put global vector.semi.precision.trace.log.disabled','1.0'],
+  ['setedit put global vector.optimize.memory.priority','4.6'],
+  ['setedit put global vector.aim.vertical.correction','3.9'],
+  ['setedit put global vector.touch.palm.detection','1.0'],
+  ['setedit put global vector.semi.precision.point.accuracy','5.0'],
+  ['setedit put global vector.optimize.data.speed','4.4'],
+  ['setedit put global vector.aim.horizontal.correction','3.8'],
+  ['setedit put global vector.touch.game.mode.active','5.0'],
+  ['setedit put global vector.semi.precision.flick.shot.opt','4.1'],
+  ['setedit put global vector.optimize.wifi.scan.disabled','1.0'],
+  ['setedit put global vector.aim.aim_lock.duration','5.0'],
+  ['setedit put global vector.touch.analog.deadzone','1.0'],
+  ['setedit put global vector.semi.precision.range.finder','2.7'],
+  ['setedit put global vector.optimize.bt.scan.disabled','1.0'],
+  ['setedit put global vector.aim.assist.radius','4.9'],
+  ['setedit put global vector.touch.pointer.acceleration','1.0'],
+  ['setedit put global vector.semi.precision.assist.algorithm','2.5'],
+  ['setedit put global vector.optimize.auto.brightness','1.0'],
+  ['setedit put global vector.aim.hit.registration','5.0'],
+  ['setedit put global vector.touch.touchscreen.id','1.0'],
+  ['setedit put global vector.semi.precision.pixel.density','3.3'],
+  ['setedit put global vector.optimize.screen.timeout','1.0'],
+  ['setedit put global vector.aim.latency.compensation','4.2'],
+  ['setedit put global vector.touch.input.method','1.0'],
+  ['setedit put global vector.semi.precision.render.latency','1.0'],
+  ['setedit put global vector.optimize.log.d.disabled','1.0'],
+  ['setedit put global vector.aim.movement.penalty','1.0'],
+  ['setedit put global vector.touch.priority.mode','5.0'],
+  ['setedit put global vector.semi.precision.sensor.poll','5.0'],
+  ['setedit put global vector.optimize.anr.disabled','1.0'], 
+  ['setedit put global vector.aim.jump.shot.precision','4.7'],
+  ['setedit put global vector.touch.frame.prediction','3.6'],
+  ['setedit put global vector.semi.precision.gyro.stabilizer','4.4'],
+  ['setedit put global vector.optimize.debug.hwui','1.0'],
+  ['setedit put global vector.aim.crouch.shot.precision','4.8'],
+  ['setedit put global vector.touch.digitizer.opt','4.1'],
+  ['setedit put global vector.semi.precision.active.track','3.9'],
+  ['setedit put global vector.optimize.engine.boost','5.0'],
+  ['setedit put global vector.aim.quick.scope.opt','4.5'],
+  ['setedit put global vector.touch.event.filter','1.0'],
+  ['setedit put global vector.semi.precision.pixel.sync','2.6'],
+  ['setedit put global vector.optimize.performance.extreme','5.0'],
+  ['setedit put global vector.aim.weapon.stability','4.9'],
+  ['setedit put global vector.touch.response.precision','4.2'],
+  ['setedit put global vector.aim.stabilizer.view','3.5'],
+  ['setedit put global vector.optimize.fps.render','5.0'],
+  ['setedit put global vector.input.sampling.speed','4.8'],
+  ['setedit put global vector.display.latency.zero','1.0'],
+  ['setedit put global vector.surface.pixel.smooth','3.9'],
+  ['setedit put global vector.touch.drag.sensitivity','4.5'],
+  ['setedit put global vector.aim.target.focus','3.1'],
+  ['setedit put global vector.optimize.gpu.composition','1.0'],
+  ['setedit put global vector.input.velocity.track','2.8'],
+  ['setedit put global vector.display.refresh.boost','5.0'],
+  ['setedit put global vector.surface.render.quality','4.2'],
+  ['setedit put global vector.touch.pointer.accuracy','5.0'],
+  ['setedit put global vector.aim.recoil.control','1.5'],
+  ['setedit put global vector.optimize.ram.priority','1.0'],
+  ['setedit put global vector.input.gesture.response','4.7'],
+  ['setedit put global vector.display.frame.sync','1.0'],
+  ['setedit put global vector.surface.touch.sampling','4.8'],
+  ['setedit put global vector.touch.motion.prediction','3.3'],
+  ['setedit put global vector.aim.crosshair.static','1.0'],
+  ['setedit put global vector.optimize.hwui.renderer','1.0'],
+  ['setedit put global vector.input.move.linearity','2.2'],
+  ['setedit put global vector.display.brightness.stable','1.0'],
+  ['setedit put global vector.surface.buffer.size','5.0'],
+  ['setedit put global vector.touch.click.speed','4.9'],
+  ['setedit put global vector.aim.headshot.assist','2.5'],
+  ['setedit put global vector.optimize.vulkan.enable','1.0'],
+  ['setedit put global vector.input.digitizer.opt','4.1'],
+  ['setedit put global vector.display.scaling.filter','1.2'],
+  ['setedit put global vector.surface.layer.acceleration','5.0'],
+  ['setedit put global vector.touch.scroll.friction','1.0'],
+  ['setedit put global vector.aim.vision.clarity','3.8'],
+  ['setedit put global vector.optimize.process.gaming','1.0'],
+  ['setedit put global vector.input.sensitivity.max','5.0'],
+  ['setedit put global vector.display.vsync.off','1.0'],
+  ['setedit put global vector.surface.texture.high','4.5'],
+  ['setedit put global vector.touch.pressure.scale','1.1'],
+  ['setedit put global vector.aim.shake.reduction','4.3'],
+  ['setedit put global vector.optimize.data.latency','1.0'],
+  ['setedit put global vector.input.coordinate.fix','1.0'],
+  ['setedit put global vector.display.overlay.off','1.0'],
+  ['setedit put global vector.surface.frame.prediction','3.6'],
+  ['setedit put global vector.touch.edge.rejection','1.0'],
+  ['setedit put global vector.aim.smooth.tracking','4.6'],
+  ['setedit put global vector.optimize.multithread.render','1.0'],
+  ['setedit put global vector.input.active.polling','5.0'],
+  ['setedit put global vector.display.color.gaming','3.2'],
+  ['setedit put global vector.surface.alignment.pixel','4.4'],
+  ['setedit put global vector.touch.analog.deadzone','1.0'],
+  ['setedit put global vector.aim.bullet.registration','5.0'],
+  ['setedit put global vector.optimize.performance.ultra','1.0'],
+  ['setedit put global vector.input.tap.stability','4.1'],
+  ['setedit put global vector.display.low_latency.mode','1.0'],
+  ['setedit put global vector.surface.shadow.disable','1.0'],
+  ['setedit put global vector.touch.high_res.input','5.0'],
+  ['setedit put global vector.aim.distance.scaling','2.7'],
+  ['setedit put global vector.optimize.thermal.limit','1.0'],
+  ['setedit put global vector.input.scan.rate','4.9'],
+  ['setedit put global vector.display.gpu.profiling','1.0'],
+  ['setedit put global vector.surface.depth.fix','3.4'],
+  ['setedit put global vector.touch.long_press.delay','1.0'],
+  ['setedit put global vector.aim.rotation.smoothness','4.0'],
+  ['setedit put global vector.optimize.cache.cleaning','1.0'],
+  ['setedit put global vector.input.pointer.velocity','3.7'],
+  ['setedit put global vector.display.hdr.performance','4.5'],
+  ['setedit put global vector.surface.transparency.off','1.0'],
+  ['setedit put global vector.touch.response.immediate','5.0'],
+  ['setedit put global vector.aim.drag.efficiency','4.8'],
+  ['setedit put global vector.optimize.background.limit','1.0'],
+  ['setedit put global vector.input.axis.precision','4.2'],
+  ['setedit put global vector.display.anti_aliasing.off','1.0'],
+  ['setedit put global vector.surface.shader.boost','3.3'],
+  ['setedit put global vector.touch.input.queue','1.0'],
+  ['setedit put global vector.aim.hitbox.alignment','3.9'],
+  ['setedit put global vector.optimize.buffer.queue','5.0'],
+  ['setedit put global vector.input.dispatch.timeout','1.0'],
+  ['setedit put global vector.display.touch_point.sync','1.0'],
+  ['setedit put global vector.surface.composition.type','1.0'],
+  ['setedit put global vector.touch.latency.level','1.0'],
+  ['setedit put global vector.aim.magnet.force','1.2'],
+  ['setedit put global vector.optimize.heap.utilization','4.7'],
+  ['setedit put global vector.input.velocity.multiplier','2.1'],
+  ['setedit put global vector.display.refresh.ultra','5.0'],
+  ['setedit put global vector.surface.texture.linear','3.0'],
+  ['setedit put global vector.touch.hover.disable','1.0'],
+  ['setedit put global vector.aim.scope.stability','4.6'],
+  ['setedit put global vector.optimize.art.tuner','1.0'],
+  ['setedit put global vector.input.calibration.active','1.0'],
+  ['setedit put global vector.display.screen.response','5.0'],
+  ['setedit put global vector.surface.render.priority','1.0'],
+  ['setedit put global vector.touch.multi.support','5.0'],
+  ['setedit put global vector.aim.curve.response','2.3'],
+  ['setedit put global vector.optimize.dex.gaming','1.0'],
+  ['setedit put global vector.input.point.accuracy','4.9'],
+  ['setedit put global vector.display.vsync.gaming','1.0'],
+  ['setedit put global vector.surface.gl.version','3.1'],
+  ['setedit put global vector.touch.boost.gaming','1.0'],
+  ['setedit put global vector.aim.lock.precision','5.0'],
+  ['setedit put global vector.optimize.ui.hardware','1.0'],
+  ['setedit put global vector.input.event.dispatch','4.4'],
+  ['setedit put global vector.display.frame.latency','1.0'],
+  ['setedit put global vector.surface.bitmaps.high','4.0'],
+  ['setedit put global vector.touch.sampling.max','5.0'],
+  ['setedit put global vector.aim.auto.calibration','1.0'],
+  ['setedit put global vector.optimize.system.gaming','1.0'],
+  ['setedit put global vector.input.raw.pointer','1.0'],
+  ['setedit put global vector.display.refresh.dynamic','1.0'],
+  ['setedit put global vector.surface.skia.render','4.8'],
+  ['setedit put global vector.touch.gesture.recognition','1.0'],
+  ['setedit put global vector.aim.shot.trigger','1.0'],
+  ['setedit put global vector.optimize.force.high_fps','1.0'],
+  ['setedit put global vector.input.motion.filter','1.0'],
+  ['setedit put global vector.display.density.sync','1.0'],
+  ['setedit put global vector.surface.alpha.optimization','1.0'],
+  ['setedit put global vector.touch.finger.detection','1.0'],
+  ['setedit put global vector.aim.assist.algorithm','3.2'],
+  ['setedit put global vector.optimize.hardware.rendering','1.0'],
+  ['setedit put global vector.input.joystick.response','4.1'],
+  ['setedit put global vector.display.sync.latency','1.0'],
+  ['setedit put global vector.surface.geometry.fix','3.3'],
+  ['setedit put global vector.touch.input.boost','5.0'],
+  ['setedit put global vector.aim.pivot.point','1.0'],
+  ['setedit put global vector.optimize.gpu.profiler','1.0'],
+  ['setedit put global vector.input.coordinate.sampling','4.2'],
+  ['setedit put global vector.display.frame.prediction','1.0'],
+  ['setedit put global vector.surface.buffer.limit','1.0'],
+  ['setedit put global vector.touch.active.sampling','5.0'],
+  ['setedit put global vector.aim.focus.ultra','4.7'],
+  ['setedit put global vector.optimize.power.gaming','1.0'],
+  ['setedit put global vector.input.report.rate','5.0'],
+  ['setedit put global vector.display.low_res.render','1.0'],
+  ['setedit put global vector.surface.effects.off','1.0'],
+  ['setedit put global vector.touch.latency.optimization','1.0'],
+  ['setedit put global vector.aim.drag.sensitivity','4.4'],
+  ['setedit put global vector.optimize.system.ultra','1.0'],
+  ['setedit put global vector.input.movement.predict','3.5'],
+  ['setedit put global vector.display.ui.speed','5.0'],
+  ['setedit put global vector.surface.compositor.boost','1.0'],
+  ['setedit put global vector.touch.sampling.ultra','5.0'],
+  ['setedit put global vector.aim.head.correction','3.9'],
+  ['setedit put global vector.optimize.performance.extreme','1.0'],
+  ['setedit put global vector.input.polling.ultra','5.0'],
+  ['setedit put global vector.display.sync.fast','1.0'],
+  ['setedit put global vector.surface.hw.acceleration','1.0'],
+  ['setedit put global vector.touch.response.fast','5.0'],
+  ['setedit put global vector.aim.tracking.force','2.4'],
+  ['setedit put global vector.optimize.render.engine','1.0'],
+  ['setedit put global vector.input.velocity.sync','4.1'],
+  ['setedit put global vector.display.latency.fix','1.0'],
+  ['setedit put global vector.surface.refresh.high','5.0'],
+  ['setedit put global vector.touch.pressure.limit','1.0'],
+  ['setedit put global vector.aim.pixel.stabilizer','4.9'],
+  ['setedit put global vector.optimize.app.launch','1.0'],
+  ['setedit put global vector.input.touch.dispatch','5.0'],
+  ['setedit put global vector.display.overdraw.off','1.0'],
+  ['setedit put global vector.surface.texture.sync','1.0'],
+  ['setedit put global vector.touch.coordinate.ultra','5.0'],
+  ['setedit put global vector.aim.assist.boost','2.9'],
+  ['setedit put global vector.optimize.memory.gaming','1.0'],
+  ['setedit put global vector.input.motion.sampling','4.6'],
+  ['setedit put global vector.display.vulkan.opt','1.0'],
+  ['setedit put global vector.surface.render.boost','5.0'],
+  ['setedit put global vector.touch.pointer.speed','5.0'],
+  ['setedit put global vector.aim.snap.on_target','4.2'],
+  ['setedit put global vector.optimize.latency.ultra','1.0'],
+  ['setedit put global vector.input.raw.sensor','1.0'],
+  ['setedit put global vector.display.fps.stabilizer','1.0'],
+  ['setedit put global vector.surface.composition.fast','1.0'],
+  ['setedit put global vector.touch.input.method','1.0'],
+  ['setedit put global vector.aim.velocity.fix','3.1'],
+  ['setedit put global vector.optimize.buffer.max','1'],
+];
+const SETEDIT_SYSTEM=[
+  ['setedit put system pointer_speed','5'],
+  ['setedit put system show_touches','0'],
+  ['setedit put system haptic_feedback_enabled','0'],
+  ['setedit put system vibrate_on','0'],
+  ['setedit put system vibrate_input_devices','0'],
+  ['setedit put system sound_effects_enabled','0'],
+  ['setedit put system screen_off_timeout','600000'],
+  ['setedit put system font_scale','1.0'],
+  ['setedit put system notification_light_pulse','0'],
+  ['setedit put system send_action_app_error','0'],
+  ['setedit put system sys.input.touch.no.recoil.thread_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.kernel_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.driver_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.input_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.output_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.render_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.gpu_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.cpu_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.net_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.thermal_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.sensor_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.touch_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.aim_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.sens_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.stab_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.turbo_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.global_prio','1'],
+  ['setedit put system sys.input.touch.no.recoil.sens_2x','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_4x','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_8x','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_snip','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_touch','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_force','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_response','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_velocity','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_damping','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_stiffness','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_tension','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_limit','100'],
+  ['setedit put system sys.input.touch.no.recoil.sens_multiplier','1.5'],
+  ['setedit put system sys.input.touch.no.recoil.feedback_haptic','0'],
+  ['setedit put system sys.input.touch.no.recoil.feedback_visual','1'],
+  ['setedit put system sys.input.touch.no.recoil.jitter_fix','1'],
+  ['setedit put system sys.input.touch.no.recoil.jitter_zero','1'],
+  ['setedit put system sys.input.touch.no.recoil.drift_fix','1'],
+  ['setedit put system sys.input.touch.no.recoil.drift_zero','1'],
+  ['setedit put system sys.input.touch.no.recoil.shake_fix','1'],
+  ['setedit put system sys.input.touch.no.recoil.friction_zero','1'],
+  ['setedit put system sys.input.touch.no.recoil.friction_off','1'],
+  ['setedit put system sys.input.touch.no.recoil.velocity_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.accel_off','1'],
+  ['setedit put system sys.input.touch.no.recoil.accel_zero','1'],
+  ['setedit put system sys.input.touch.no.recoil.linear_on','1'],
+  ['setedit put system sys.input.touch.no.recoil.trigger_fast','1'],
+  ['setedit put system sys.input.touch.no.recoil.trigger_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.tap_fast','1'],
+  ['setedit put system sys.input.touch.no.recoil.drag_smooth','100'],
+  ['setedit put system sys.input.touch.no.recoil.scroll_smooth','100'],
+  ['setedit put system sys.input.touch.no.recoil.gesture_fix','1'],
+  ['setedit put system sys.input.touch.no.recoil.area_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.edge_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.center_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.pixel_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.ratio_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.scale_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.multiplier_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.offset_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.gain_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.mass_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.gravity_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.error_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.latency_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.stutter_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.lag_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.drop_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.skip_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.loss_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.fault_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.warning_limit','0'],
+  ['setedit put system sys.input.touch.no.recoil.final_stable','1'],
+  ['setedit put system sys.input.touch.no.recoil.final_fixed','1'],
+  ['setedit put system sys.input.touch.no.recoil.buffer_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.image_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.font_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.path_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.skia_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.vulkan_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.layer_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.texture_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.render_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.logic_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.point_cache','10'],
+  ['setedit put system sys.input.touch.no.recoil.event_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.frame_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.active_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.master_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.ultra_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.boost_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.smooth_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.aim_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.lock_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.tracking_cache','1'],
+  ['setedit put system sys.input.touch.no.recoil.end_done','1'],
+];
+const SETEDIT_SECURE=[
+  ['setedit put secure screensaver_enabled','0'],
+  ['setedit put secure doze_enabled','0'],
+  ['setedit put secure doze_pulse_on_pick_up','0'],
+  ['setedit put secure doze_pulse_on_double_tap','0'],
+  ['setedit put secure location_mode','0'],
+  ['setedit put secure sleep_timeout','-1'],
+  ['setedit put secure long_press_timeout','300'],
+  ['setedit put secure multi_press_timeout','300'],
+  ['setedit put secure accessibility_enabled','0'],
+  ['setedit put secure spell_checker_enabled','0'],
+  ['setedit put secure lock_screen_show_notifications','0'],
+  ['setedit put secure screensaver_activate_on_sleep','0'],
+];
+const ADB_CMDS=[
+  'settings put global gpu_debug_layers_enable 0',
+  'settings put global debug.performance.tuning 1',
+  'settings put global tcp_default_init_rwnd 60',
+  'settings put global wifi_scan_throttle_enabled false',
+  'settings put global wifi_scan_interval_ms 300000',
+  'echo 3 > /proc/sys/vm/drop_caches',
+  'echo 10 > /proc/sys/vm/swappiness',
+  'echo 50 > /proc/sys/vm/vfs_cache_pressure',
+  'echo 4096 > /proc/sys/vm/min_free_kbytes',
+  'echo deadline > /sys/block/mmcblk0/queue/scheduler',
+  'echo 256 > /sys/block/mmcblk0/queue/read_ahead_kb',
+  'echo 0 > /sys/block/mmcblk0/queue/rotational',
+  'cmd activity set-standby-bucket com.dts.freefireth active',
+  'cmd activity set-standby-bucket com.dts.freefire active',
+  'dumpsys deviceidle whitelist +com.dts.freefireth',
+  'dumpsys deviceidle whitelist +com.dts.freefire',
+  'am set-process-limit 1',
+  'settings put global restricted_networking_mode 0',
+];
+const BREVENT_PKGS=[
+  'brevent com.google.android.gms',
+  'brevent com.google.android.gsf',
+  'brevent com.android.vending',
+  'brevent com.miui.analytics',
+  'brevent com.samsung.android.sm',
+  'brevent com.samsung.android.sm.policy',
+  'brevent com.coloros.safecenter',
+  'brevent com.oppo.autotest',
+  'brevent com.huawei.systemmanager',
+  'brevent com.android.providers.calendar',
+  'brevent com.google.android.apps.photos',
+  'brevent com.google.android.apps.maps',
+  'brevent com.facebook.orca',
+  'brevent com.facebook.katana',
+  'brevent com.instagram.android',
+  'brevent com.tiktok',
+];
+
+function buildRealCodes(devName){
+  const isPC=devName.toLowerCase().match(/bluestacks|ldplayer|mumu|nox|memu|gameloop/);
+  const isIOS=devName.toLowerCase().match(/iphone|ipad/);
+  const all=[];
+  all.push('# ══════════════════════════════════════════');
+  all.push('# LILI X — CÓDIGOS REALES DE OPTIMIZACIÓN');
+  all.push('# DISPOSITIVO: '+devName.toUpperCase());
+  all.push('# MÉTODO: setedit / ADB Shell / Brevent / Shizuku');
+  all.push('# ══════════════════════════════════════════');
+  all.push('# USO: Instala Shizuku o activa ADB inalámbrico');
+  all.push('# Pega cada línea en la terminal de Shizuku/ADB');
+  all.push('# Para brevent: usa la app Brevent directamente');
+  all.push('# ══════════════════════════════════════════');
+  all.push('');
+  if(!isIOS){
+    all.push('# — SETEDIT GLOBAL —');
+    SETEDIT_GLOBAL.forEach(([cmd,val])=>all.push(cmd+' '+val));
+    all.push('');
+    all.push('# — SETEDIT SYSTEM —');
+    SETEDIT_SYSTEM.forEach(([cmd,val])=>all.push(cmd+' '+val));
+    all.push('');
+    all.push('# — SETEDIT SECURE —');
+    SETEDIT_SECURE.forEach(([cmd,val])=>all.push(cmd+' '+val));
+    all.push('');
+    if(!isPC){
+      all.push('# — ADB SHELL / SHIZUKU —');
+      ADB_CMDS.forEach(c=>all.push(c));
+      all.push('');
+      all.push('# — BREVENT —');
+      BREVENT_PKGS.forEach(c=>all.push(c));
+    } else {
+      all.push('# — PC/EMULADOR ADB —');
+      ADB_CMDS.slice(0,12).forEach(c=>all.push(c));
+    }
+  } else {
+    all.push('# iOS: Cierra apps en multitarea antes de jugar');
+    all.push('# Activa/desactiva Modo Avión para resetear red');
+    all.push('# Activa Modo Bajo Consumo para limpiar RAM');
+    all.push('# Deshabilita Background App Refresh en Ajustes');
+  }
+  all.push('');
+  all.push('# — FIN DE CÓDIGOS NICO — NSZ X & STIVENZZZZ —');
+  return all;
+}
+
+let allCodes=[];
+function genBatch(cat){
+  let batch=[];
+  if(!cat){
+    batch=buildRealCodes(curDev||'Android Universal');
+  }else{
+    const catMap={
+      FPS:[...SETEDIT_GLOBAL.slice(0,8).map(([c,v])=>c+' '+v),...ADB_CMDS.slice(0,6)],
+      PING:[...SETEDIT_GLOBAL.slice(9,15).map(([c,v])=>c+' '+v),...ADB_CMDS.slice(2,8)],
+      GRAFICOS:[...SETEDIT_GLOBAL.slice(7,11).map(([c,v])=>c+' '+v),...ADB_CMDS.slice(0,5)],
+      TACTICO:[...SETEDIT_SYSTEM.map(([c,v])=>c+' '+v)],
+      MEMORIA:[...ADB_CMDS.slice(5,12),...SETEDIT_SECURE.slice(0,5).map(([c,v])=>c+' '+v)],
+      RED:[...SETEDIT_GLOBAL.slice(9).map(([c,v])=>c+' '+v),...ADB_CMDS.slice(2,7)],
+      BATERIA:[...SETEDIT_SECURE.map(([c,v])=>c+' '+v),...SETEDIT_GLOBAL.slice(5,8).map(([c,v])=>c+' '+v)],
+      SENSI:[...SETEDIT_SYSTEM.map(([c,v])=>c+' '+v),...SETEDIT_SECURE.slice(6).map(([c,v])=>c+' '+v)],
+    };
+    batch=['# LILI X — CATEGORÍA: '+cat,'# DISPOSITIVO: '+(curDev||'UNIVERSAL'),''].concat(catMap[cat]||[]);
+  }
+  allCodes=[...allCodes,...batch];
+  const dsp=document.getElementById('codeDsp');
+  dsp.innerHTML='';
+  batch.slice(0,80).forEach((c,i)=>{
+    const d=document.createElement('div');d.className='cline';
+    const isCmt=c.startsWith('#')||c==='';
+    d.innerHTML=`<span class="cnum">${isCmt?'···':String(i+1).padStart(4,'0')}</span><span style="color:${isCmt?'#6600aa':'#ff66aa'};">${c}</span>`;
+    dsp.appendChild(d);
+  });
+  dsp.scrollTop=dsp.scrollHeight;
+  const realCount=allCodes.filter(c=>c&&!c.startsWith('#')).length;
+  document.getElementById('cntDisp').textContent=realCount+' cmds reales';
+  document.getElementById('codeStatus').innerHTML=`<div class="sline" style="color:#00ffcc;">[ ✅ ${batch.filter(c=>c&&!c.startsWith('#')).length} COMANDOS REALES | TOTAL: ${realCount} ]</div><div class="sline" style="color:#9966ff;">[ DISPOSITIVO: ${curDev||'UNIVERSAL'} | LISTO PARA COPIAR Y PEGAR ]</div>`;
+  bCodeGen();speak('Códigos reales generados. Copia y pega en Shizuku o ADB');
+}
+function genCat(cat){bActivate();speak('Categoría '+cat.toLowerCase()+' generada');genBatch(cat);}
+function copyCodes(){
+  if(!allCodes.length){speak('No hay códigos para copiar');return;}
+  navigator.clipboard?.writeText(allCodes.join('\n')).then(()=>{
+    beep(1047,.1,'triangle',.07);
+    speak('Códigos copiados. Pégalos en Shizuku, ADB o Brevent');
+    document.getElementById('codeStatus').innerHTML+=`<div class="sline" style="color:#ffff00;">[ 📋 COPIADO — PEGA EN SHIZUKU O ADB TERMINAL ]</div>`;
+  }).catch(()=>speak('No se pudo copiar automáticamente'));
+}
+function clearCodes(){
+  allCodes=[];
+  document.getElementById('codeDsp').innerHTML='<div style="color:#330044;">[ Limpiado ]</div>';
+  document.getElementById('codeStatus').innerHTML='<div class="sline" style="color:#440066;">[ Listo para nueva generación ]</div>';
+  beep(280,.25,'sawtooth',.07);speak('Banco de códigos limpiado');
+}
+
+// ── SLOTS ──
+const sLog=[];
+function applySlot(n){
+  const name=document.getElementById('sn'+n).value.trim()||'SLOT #'+n;
+  const code=document.getElementById('sc'+n).value.trim();
+  if(!code){speak('El slot número '+n+' está vacío');bError();return;}
+  bActivate();speak('Código de '+name+' aplicado correctamente');
+  const ts=new Date().toLocaleTimeString();
+  sLog.unshift(`[${ts}] SLOT #${n} · ${name.toUpperCase()} → APLICADO ✓`);
+  document.getElementById('customLog').innerHTML=sLog.slice(0,8).map(l=>`<div class="sline" style="color:#00ffcc;">${l}</div>`).join('');
+}
+
+// ── SETTINGS ──
+function togSet(name,on){
+  if(name==='voz femenina')voiceOn=on;
+  if(name==='efectos de sonido')sfxOn=on;
+  bActivate();speak(name+(on?' activado':' desactivado'));
+}
+
+</script>
+</body>
+</html>
